@@ -4,9 +4,14 @@ library(googlesheets4)
 
 gs4_auth(path = "credentials.json")
 
+library(httr)
+library(rvest)
+
 url <- "https://pcpndt.karnataka.gov.in/Dashboard/Default.aspx"
 
-page <- read_html(url)
+page <- read_html(
+  GET(url, user_agent("Mozilla/5.0"))
+)
 
 df <- page %>%
   html_table(fill = TRUE) %>%
