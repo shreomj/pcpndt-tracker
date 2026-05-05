@@ -1,17 +1,23 @@
 library(rvest)
 library(dplyr)
 library(googlesheets4)
+library(httr)
 
 gs4_auth(path = "credentials.json")
 
-library(httr)
-library(rvest)
-
 url <- "https://pcpndt.karnataka.gov.in/Dashboard/Default.aspx"
 
-page <- read_html(
-  GET(url, user_agent("Mozilla/5.0"))
-)
+page <- tryCatch({
+  
+  res <- GET(url, user_agent("Mozilla/5.0"))
+  stop_for_status(res)
+  
+  read_html(res)
+  
+}, error = function(e) {
+  message("ERROR in scraping: ", e$message)
+  quit(status = 1)
+})
 
 df <- page %>%
   html_table(fill = TRUE) %>%
@@ -27,9 +33,6 @@ df <- page %>%
   )
 
 sheet_append(
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-pe0R7h5kOnfEcGCP5GClLXNgMAelKI58QQdj1nXSlRgGubP3hvpk9iaR7OLVzOWlVZAMMZdcTruL/pubhtml",
+  "https://docs.google.com/spreadsheets/d/1kKm5xRHEClQFR-yRurSJAadaXDmYxfTOSs6jqwU7LjY/edit",
   df
 )
-
-#https://docs.google.com/spreadsheets/d/1kKm5xRHEClQFR-yRurSJAadaXDmYxfTOSs6jqwU7LjY/edit?usp=sharing
-#https://docs.google.com/spreadsheets/d/e/2PACX-1vR-pe0R7h5kOnfEcGCP5GClLXNgMAelKI58QQdj1nXSlRgGubP3hvpk9iaR7OLVzOWlVZAMMZdcTruL/pubhtml
