@@ -9,7 +9,17 @@ url <- "https://pcpndt.karnataka.gov.in/Dashboard/Default.aspx"
 
 page <- tryCatch({
   
-  res <- GET(url, user_agent("Mozilla/5.0"))
+  res <- RETRY(
+    "GET",
+    url,
+    user_agent("Mozilla/5.0"),
+    add_headers("Accept-Language" = "en-US,en;q=0.9"),
+    times = 5,
+    pause_base = 2,
+    timeout(60)
+  )
+  
+  print(status_code(res))
   stop_for_status(res)
   
   read_html(res)
